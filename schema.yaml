@@ -1,0 +1,231 @@
+openapi: 3.0.3
+info:
+  title: Sports Matches API
+  version: 1.0.0
+  description: API для получения информации о матчах, командах и игроках
+
+components:
+  securitySchemes:
+    AuthToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: >
+        Токен авторизации, передается в заголовке Authorization без схемы
+  schemas:
+    Match:
+      type: object
+      properties:
+        id:
+          type: integer
+        team1_id:
+          type: integer
+        team2_id:
+          type: integer
+        score:
+          type: string
+          pattern: "^[0-9]+:[0-9]+$"
+          description: >
+            Счет в формате "X:Y", где X - количество очков первой команды, Y - второй команды
+          example: "5:1"
+      required:
+        - id
+        - team1_id
+        - team2_id
+        - score
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          description: Название команды, латинские буквы и пробелы
+          pattern: "^[A-Za-z ]+$"
+          example: "The Best"
+        players_ids:
+          type: array
+          items:
+            type: integer
+      required:
+        - id
+        - name
+        - players_ids
+
+    Player:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          description: Имя игрока (латинские символы и пробелы)
+          example: "Danya Golov"
+        number:
+          type: integer
+          description: Номер игрока на форме
+      required:
+        - id
+        - name
+        - number
+
+    LoginRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Причина, почему мы должны взять вас в параллель P
+          maxLength: 256
+          example: "Хочу участвовать в параллели P, потому что..."
+      required:
+        - reason
+
+    Goal:
+      type: object
+      properties:
+        time_minutes:
+          type: integer
+          description: Время удара в минутах матча
+        player_id:
+          type: integer
+          description: ID игрока, который забил гол
+        team_id:
+          type: integer
+          description: ID команды, игрок которой забил гол
+      required:
+        - time_minutes
+        - player_id
+        - team_id
+
+    MatchGoals:
+      type: object
+      properties:
+        match_id:
+          type: integer
+        goals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Goal'
+          description: Список голов в матче
+      required:
+        - match_id
+        - goals
+
+security:
+  - AuthToken: [ ]
+
+paths:
+  /matches:
+    get:
+      summary: Получить список всех матчей
+      security:
+        - AuthToken: [ ]
+      responses:
+        '200':
+          description: Список матчей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+
+  /teams:
+    get:
+      summary: Получить список всех команд
+      security:
+        - AuthToken: [ ]
+      responses:
+        '200':
+          description: Список команд
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+
+  /teams/{id}:
+    get:
+      summary: Получить информацию о команде по ID
+      security:
+        - AuthToken: [ ]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID команды
+      responses:
+        '200':
+          description: Информация о команде
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '404':
+          description: Команда не найдена
+
+  /players/{id}:
+    get:
+      summary: Получить информацию об игроке по ID
+      security:
+        - AuthToken: [ ]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID игрока
+      responses:
+        '200':
+          description: Информация об игроке
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+        '404':
+          description: Игрок не найден
+
+  /login:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Авторизация успешна
+        '400':
+          description: Некорректный запрос
+
+  /goals:
+    get:
+      summary: Получить список голов в конкретном матче
+      security:
+        - AuthToken: [ ]
+      parameters:
+        - in: query
+          name: match_id
+          schema:
+            type: integer
+          required: true
+          description: ID матча
+      responses:
+        '200':
+          description: Список голов в матче
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MatchGoals'
+        '403':
+          description: Неавторизованный запрос
+        '400':
+          description: Некорректный запрос
