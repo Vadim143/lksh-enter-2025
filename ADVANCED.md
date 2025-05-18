@@ -17,7 +17,7 @@
 - `GET /goals?match_id=<id матча>` — список голов в конкретном матче (доступен только после регистрации токена ручкой /login)
 ```json
 [
-  {"match_id": 123, "goals": [{"time_minutes": 42, "player_id": 56, "team_id": 2}]}
+  {"id": 1, "player": 56, "match": 1, "minute": 42}
 ]
 ```
 
@@ -38,7 +38,7 @@
 ```json
 [
     {
-        "match_id": 123,
+        "match": 123,
         "time": 42
     },
     ...
