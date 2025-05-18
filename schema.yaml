@@ -18,16 +18,20 @@ components:
       properties:
         id:
           type: integer
-        team1_id:
+        team1:
           type: integer
-        team2_id:
+          description: Идентификатор первой команды
+        team2:
           type: integer
-        score:
+          description: Идентификатор второй команды
+        team1_score:
           type: string
-          pattern: "^[0-9]+:[0-9]+$"
-          description: >
-            Счет в формате "X:Y", где X - количество очков первой команды, Y - второй команды
-          example: "5:1"
+          pattern: "^[0-9]+$"
+          description: Количество забитых голов
+        team2_score:
+          type: string
+          pattern: "^[0-9]+$"
+          description: Количество забитых голов
       required:
         - id
         - team1_id
@@ -44,8 +48,9 @@ components:
           description: Название команды, латинские буквы и пробелы
           pattern: "^[A-Za-z ]+$"
           example: "The Best"
-        players_ids:
+        players:
           type: array
+          description: Идентификаторы игроков
           items:
             type: integer
       required:
@@ -60,8 +65,12 @@ components:
           type: integer
         name:
           type: string
-          description: Имя игрока (латинские символы и пробелы)
-          example: "Danya Golov"
+          description: Имя игрока
+          example: "Danya"
+        surname:
+          type: string
+          description: Фамилия игрока
+          example: "Golov"
         number:
           type: integer
           description: Номер игрока на форме
@@ -84,33 +93,21 @@ components:
     Goal:
       type: object
       properties:
-        time_minutes:
+        id:
+          type: integer
+        player:
+          type: integer
+          description: Идентификатор игрока, который забил гол
+        match:
+          type: integer
+          description: Идентификатор матча, в котором был забит гол
+        minute:
           type: integer
           description: Время удара в минутах матча
-        player_id:
-          type: integer
-          description: ID игрока, который забил гол
-        team_id:
-          type: integer
-          description: ID команды, игрок которой забил гол
       required:
         - time_minutes
         - player_id
         - team_id
-
-    MatchGoals:
-      type: object
-      properties:
-        match_id:
-          type: integer
-        goals:
-          type: array
-          items:
-            $ref: '#/components/schemas/Goal'
-          description: Список голов в матче
-      required:
-        - match_id
-        - goals
 
 security:
   - AuthToken: [ ]
@@ -224,7 +221,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MatchGoals'
+                  $ref: '#/components/schemas/Goal'
         '403':
           description: Неавторизованный запрос
         '400':
