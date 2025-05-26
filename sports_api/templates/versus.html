@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Сравнение игроков</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input { margin: 5px; padding: 5px; }
+    button { padding: 6px 12px; }
+    #result { margin-top: 20px; }
+    .match { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Сравнение игроков</h1>
+  <label for="player1">ID Игрока 1:</label>
+  <input type="text" id="player1" placeholder="Введите ID"><br>
+
+  <label for="player2">ID Игрока 2:</label>
+  <input type="text" id="player2" placeholder="Введите ID"><br>
+
+  <button onclick="comparePlayers()">Сравнить</button>
+
+  <div id="result"></div>
+
+  <script>
+    // Пример базы данных матчей
+    const matches = [
+      { id: 1, playerA: "101", playerB: "202", score: "3:2" },
+      { id: 2, playerA: "202", playerB: "101", score: "2:1" },
+      { id: 3, playerA: "101", playerB: "303", score: "3:0" },
+      { id: 4, playerA: "404", playerB: "202", score: "1:1" },
+      { id: 5, playerA: "202", playerB: "101", score: "0:3" },
+    ];
+
+    function comparePlayers() {
+      const id1 = document.getElementById("player1").value.trim();
+      const id2 = document.getElementById("player2").value.trim();
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "";
+
+      if (!id1 || !id2) {
+        resultDiv.textContent = "Пожалуйста, введите оба ID игроков.";
+        return;
+      }
+
+      const foundMatches = matches.filter(
+        match =>
+          (match.playerA === id1 && match.playerB === id2) ||
+          (match.playerA === id2 && match.playerB === id1)
+      );
+
+      if (foundMatches.length === 0) {
+        resultDiv.textContent = "Матчи между этими игроками не найдены.";
+        return;
+      }
+
+      resultDiv.innerHTML = "<h3>Матчи между игроками:</h3>";
+      foundMatches.forEach(match => {
+        const div = document.createElement("div");
+        div.className = "match";
+        div.textContent = `Матч ${match.id}: ${match.playerA} vs ${match.playerB} — Счёт: ${match.score}`;
+        resultDiv.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
