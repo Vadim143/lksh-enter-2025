@@ -67,13 +67,15 @@
      ]
      ```
 
-   - **GET `/front/stats`**  
+   - **GET `/front/stats`**
+     ![image](https://github.com/user-attachments/assets/4fae33b0-c738-4282-9c5b-4a1750584b12)
      Веб-страница с статистикой команд.
-    ![image](https://github.com/user-attachments/assets/4fae33b0-c738-4282-9c5b-4a1750584b12)
+    
 
-   - **GET `/front/versus`**  
+   - **GET `/front/versus`**
+     ![image](https://github.com/user-attachments/assets/b7d490e9-8ef1-4711-9f98-34fc22bbbd92)
      Веб-страница для сравнения игроков.
-    ![image](https://github.com/user-attachments/assets/b7d490e9-8ef1-4711-9f98-34fc22bbbd92)
+    
 
 ## 📦 Требования
 
