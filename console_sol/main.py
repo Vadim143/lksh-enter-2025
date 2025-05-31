@@ -1,72 +1,95 @@
-# from imghdr import test_exr
-# from logging import StringTemplateStyle
+import sys
+import logging
+from datetime import datetime, timedelta
+from apscheduler.triggers.date import DateTrigger
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from console_sol.api import *
-import sys
+from console_sol.cache import *
+from misc.methods import *
 
-teams = fetch_teams()
-matches = fetch_matches()
+# Настройка логгера до любых логов
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='[%(asctime)s] MAIN1 %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("main_console.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("main_console")
+
+# Планировщик
+scheduler = AsyncIOScheduler()
+scheduler.start()
+
+# Глобальные переменные
+teams = []
+matches = []
 team_by_id = dict()
 team_by_name = dict()
 
-players = set()
-for team in teams:
-    team_by_name[team['name']] = team
-    team_by_id[team['id']] = team
-    for id in team['players']:
-        players.add(id)
+
+def update_data():
+    logger.info("Обновление данных...")
+    teams.clear()
+    teams.extend(fetch_teams())
+
+    matches.clear()
+    matches.extend(fetch_matches())
+
+    team_by_id.clear()
+    team_by_name.clear()
+    for team in teams:
+        team_by_name[team.name] = team
+        team_by_id[team.id] = team
+
+    scheduler.add_job(update_data, trigger=DateTrigger(datetime.now() + timedelta(seconds=300)))
+    logger.info("Данные успешно обновлены")
 
 
 def convert_id(id):
-    player = fetch_player(id)
-    name = player.name
-    if player.surname is not None:
-        name += f' {player.surname}'
-    return name
+    if id in cached_players:
+        return cached_players[id]
+    else:
+        logger.info(f"Игрок id={id} не найден в кеше. Получаем из API...")
+        player = fetch_player(id)
+        add_player(player)
+        return player
 
 
-players = sorted(map(convert_id, players))
-print(*players, sep='\n')
+# Основная инициализация
+update_data()
 
+players = set()
+for team in teams:
+    for id in team.players:
+        players.add(id)
+
+cached_players = get_players()
+players = sorted(map(convert_id, players), key=lambda x: [x.name, x.surname])
+
+logger.info(f"Всего игроков: {len(players)}")
+for player in players:
+    print(f"{player.name} {player.surname}")
+
+# Обработка пользовательского ввода
 for line in sys.stdin:
     line = line.strip()
     if not line:
         continue
-    else:
+    try:
         request, tmp = line.split("?")
         tmp = tmp.strip()
         request = request.strip()
         if request == 'stats':
             name = tmp[1:-1]
-            id = team_by_name[name]['id']
-            wins = loses = scored = missed = 0
-            for match in matches:
-                t1s = match['team1_score']
-                t2s = match['team2_score']
-                if match['team1'] == id:
-                    scored += t1s
-                    missed += t2s
-                    if t1s > t2s:
-                        wins += 1
-                    else:
-                        loses += 1
-                elif match['team2'] == id:
-                    scored += t2s
-                    missed += t1s
-                    if t1s < t2s:
-                        wins += 1
-                    else:
-                        loses += 1
-            print(wins, loses, scored - missed)
+            wins, loses, dif = get_stat(name, team_by_name=team_by_name, matches=matches)
+            print(wins, loses, f"{'+' if dif >= 0 else ''}{dif}")
         elif request == 'versus':
             p1, p2 = map(int, tmp.split())
-            cnt = 0
-            for match in matches:
-                t1 = team_by_id[match['team1']]
-                t2 = team_by_id[match['team2']]
-                t1ps = t1['players']
-                t2ps = t2['players']
-                if (p1 in t1ps and p2 in t2ps) or (p2 in t1ps and p1 in t2ps):
-                    cnt += 1
+            cnt = versus(p1, p2, team_by_id=team_by_id, matches=matches)
             print(cnt)
-
+    except Exception as e:
+        logger.warning(f"Ошибка при обработке ввода: {line} — {e}")
+        print("Неверный запрос")

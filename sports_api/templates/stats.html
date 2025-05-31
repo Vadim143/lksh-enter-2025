@@ -3,12 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Статистика команды</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    input { margin: 5px; padding: 5px; }
-    button { padding: 6px 12px; }
-    #result { margin-top: 20px; }
-  </style>
+  <link rel="stylesheet" href="/templates/stats.css">
 </head>
 <body>
   <h1>Статистика команды</h1>
@@ -20,75 +15,9 @@
   <div id="result"></div>
 
   <script>
-    // Пример базы матчей (score в формате "забито:пропущено" для первой команды)
-    const matches = [
-      { teamA: "101", teamB: "202", score: "2:1" },
-      { teamA: "101", teamB: "303", score: "0:3" },
-      { teamA: "404", teamB: "101", score: "1:4" },
-      { teamA: "202", teamB: "101", score: "2:2" },
-      { teamA: "101", teamB: "505", score: "3:0" },
-    ];
-
-    function analyzeTeam() {
-      const teamId = document.getElementById("teamId").value.trim();
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "";
-
-      if (!teamId) {
-        resultDiv.textContent = "Пожалуйста, введите ID команды.";
-        return;
-      }
-
-      let wins = 0;
-      let losses = 0;
-      let draws = 0;
-      let goalsFor = 0;
-      let goalsAgainst = 0;
-      let playedMatches = 0;
-
-      matches.forEach(match => {
-        let isTeamA = match.teamA === teamId;
-        let isTeamB = match.teamB === teamId;
-
-        if (!isTeamA && !isTeamB) return;
-
-        const [scoreA, scoreB] = match.score.split(":").map(Number);
-
-        let teamGoals, opponentGoals;
-        if (isTeamA) {
-          teamGoals = scoreA;
-          opponentGoals = scoreB;
-        } else {
-          teamGoals = scoreB;
-          opponentGoals = scoreA;
-        }
-
-        goalsFor += teamGoals;
-        goalsAgainst += opponentGoals;
-        playedMatches++;
-
-        if (teamGoals > opponentGoals) wins++;
-        else if (teamGoals < opponentGoals) losses++;
-        else draws++;
-      });
-
-      if (playedMatches === 0) {
-        resultDiv.textContent = "Матчи с участием этой команды не найдены.";
-        return;
-      }
-
-      resultDiv.innerHTML = `
-        <h3>Статистика команды ${teamId}:</h3>
-        <ul>
-          <li>Всего матчей: ${playedMatches}</li>
-          <li>Побед: ${wins}</li>
-          <li>Поражений: ${losses}</li>
-          <li>Ничьих: ${draws}</li>
-          <li>Забито голов: ${goalsFor}</li>
-          <li>Пропущено голов: ${goalsAgainst}</li>
-        </ul>
-      `;
-    }
+    // Пример замены сервером: в проде сюда подставляется массив матчей
+    const matches = {{ matches | tojson }};
   </script>
+  <script src="/templates/stats.js"></script>
 </body>
 </html>

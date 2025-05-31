@@ -1,12 +1,20 @@
+version: "3.9"
+
 services:
-  web:
+  console:
     build:
       context: .
-      dockerfile: Dockerfile
-    command: uvicorn sports_api.main:app --host 0.0.0.0 --port 8000 --reload
+      dockerfile: Dockerfile.console
+    container_name: console_app
+    tty: true  # позволяет видеть вывод
+    stdin_open: true
+
+  sportapi:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: fastapi_app
     ports:
       - "8000:8000"
-    env_file:
-      - .env
-    volumes:
-      - ./data:/usr/src/app/data
+
+

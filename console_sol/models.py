@@ -24,3 +24,10 @@ class Team:
     id: int
     name: str
     players: list[int]
+
+@dataclass
+class Goal:
+    id: int
+    player: int
+    match: int
+    minute: int
