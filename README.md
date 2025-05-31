@@ -23,9 +23,9 @@
 
 ### API-версия
 
-1. Перейдите в папку `ssports_api/`:
+1. Перейдите в папку `sports_api/`:
     ```bash
-    cd ssports_api
+    cd sports_api
     ```
 
 2. Запустите сервер:
