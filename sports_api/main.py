@@ -60,4 +60,4 @@ if __name__ == "__main__":
     logger.info("Запуск планировщика и сервера")
     scheduler.start()
     update_data()
-    uvicorn.run(app, host="127.0.0.1", port=80)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
